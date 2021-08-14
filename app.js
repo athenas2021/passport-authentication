@@ -1,6 +1,8 @@
 const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 const mongoose = require('mongoose');
+const flash = require('connect-flash');
+const session = require('express-session');
 
 const app = express();
 
@@ -22,6 +24,23 @@ app.set('view engine', 'ejs');
 //BodyParser
 app.use(express.urlencoded({extented:false}));
 app.use(express.json());
+
+//Express session midleware
+app.use(session({
+  secret: 'knsecret',
+  resave: false,
+  saveUninitialized: true
+}))
+
+//Connect Flash
+app.use(flash());
+
+//Variaveis globais
+app.use((req,res,next) => {
+    res.locals.success_msg = res.flash('success_msg');
+    res.locals.error_msg = res.flash('error_msg');
+    next();
+});
 
 //Rotas
 app.use('/', require('./routes/index.js'));
