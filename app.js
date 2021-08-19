@@ -1,10 +1,14 @@
 const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 const mongoose = require('mongoose');
+const passport = require('passport');
 const flash = require('connect-flash');
 const session = require('express-session');
 
 const app = express();
+
+// Configurar Passport (auth)
+require('./config/passport')(passport);
 
 //Configurar BD
 const db = require('./config/keys').MongoURI;
@@ -22,7 +26,7 @@ app.use(expressLayouts);
 app.set('view engine', 'ejs');
 
 //BodyParser
-app.use(express.urlencoded({extented:false}));
+app.use(express.urlencoded({extented:true}));
 app.use(express.json());
 
 //Express session midleware
@@ -32,13 +36,18 @@ app.use(session({
   saveUninitialized: true
 }))
 
+// Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+
 //Connect Flash
 app.use(flash());
 
 //Variaveis globais
 app.use((req,res,next) => {
-    res.locals.success_msg = res.flash('success_msg');
-    res.locals.error_msg = res.flash('error_msg');
+    res.locals.success_msg = req.flash('success_msg');
+    res.locals.error_msg = req.flash('error_msg');
     next();
 });
 
